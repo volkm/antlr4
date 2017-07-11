@@ -46,7 +46,6 @@ if(APPLE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
   # the RPATH to be used when installing
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  set(CMAKE_INSTALL_RPATH "lib")
   # add the automatically determined parts of the RPATH
   # which point to directories outside the build tree to the install RPATH
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
