@@ -11,13 +11,18 @@ USER_M2 constant below.
 
 the java version is used according to environment variable $JAVA_HOME.
 """
+
+from __future__ import print_function
+
 import glob
 import shutil
 import argparse
 import fnmatch
 import os.path
+import subprocess
+import sys
 import time
-from subprocess import call
+from subprocess import check_call
 
 
 # ANTLR Version, here we only care about major version.
@@ -83,9 +88,9 @@ def gen_parser(grammar, a4):
         antlr_complains("Cannot find java. Check your JAVA_HOME setting.")
         return
 
-    call([java, "-jar", a4,
-          "-Dlanguage=Swift", grammar, "-visitor",
-          "-o", grammar_folder + "/gen"])
+    check_call([java, "-jar", a4,
+               "-Dlanguage=Swift", grammar, "-visitor",
+               "-o", grammar_folder + "/gen"])
 
 
 def swift_test():
@@ -93,7 +98,7 @@ def swift_test():
     Run unit tests.
     """
     generate_parser()
-    call(["swift", "test"])
+    check_call(["swift", "test"])
 
 
 def get_argument_parser():
@@ -110,7 +115,7 @@ def get_argument_parser():
                         "Use this command if you want to include ANTLR4 as SPM dependency.", )
     p.add_argument("--gen-xcodeproj",
                    action="store_true",
-                   help="<DEVELOPER> Generates an Xcode project for ANTLR4 Swift runtime. "
+                   help="<DEVELOPER, USER> Generates an Xcode project for ANTLR4 Swift runtime. "
                         "This directive will generate all the required parsers for the project. "
                         "Feel free to re-run whenever you updated the test grammar files.")
     p.add_argument("--test",
@@ -141,13 +146,17 @@ def generate_spm_module(in_folder=TMP_FOLDER):
     shutil.copy("Package.swift", tmp_antlr_folder)
 
     os.chdir(tmp_antlr_folder)
-    call(["git", "init"])
-    call(["git", "add", "*"])
-    call(["git", "commit", "-m", "Initial commit."])
-    call(["git", "tag", "{}.0.0".format(MAJOR_VERSION)])
+    check_call(["git", "init"])
+    check_call(["git", "add", "*"])
+    check_call(["git", "commit", "-m", "Initial commit."])
+    check_call(["git", "tag", "{}.0.0".format(MAJOR_VERSION)])
 
     antlr_says("Created local repository.")
-    antlr_says("Put .Package(url: \"{}\", majorVersion: {}) in Package.swift.".format(os.getcwd(), MAJOR_VERSION))
+    antlr_says("(swift-tools-version:3.0) " 
+               "Put .Package(url: \"{}\", majorVersion: {}) in Package.swift.".format(os.getcwd(), MAJOR_VERSION))
+    antlr_says("(swift-tools-wersion:4.0) "
+               "Put .package(url: \"{}\", from: \"{}.0.0\") in Package.swift "
+               "and add \"Antlr4\" to target dependencies. ".format(os.getcwd(), MAJOR_VERSION))
 
 
 def generate_xcodeproj():
@@ -159,7 +168,7 @@ def generate_xcodeproj():
     :return:
     """
     generate_parser()
-    call(["swift", "package", "generate-xcodeproj"])
+    check_call(["swift", "package", "generate-xcodeproj"])
 
 
 def generate_parser():
@@ -172,21 +181,29 @@ def generate_parser():
 
 
 def antlr_says(msg):
-    print GREEN + "[ANTLR] " + msg + RESET
+    print(GREEN + "[ANTLR] " + msg + RESET)
 
 
 def antlr_complains(msg):
-    print RED + "[ANTLR] " + msg + RESET
+    print(RED + "[ANTLR] " + msg + RESET)
 
 
 if __name__ == "__main__":
     parser = get_argument_parser()
     args = parser.parse_args()
-    if args.gen_spm_module:
-        generate_spm_module()
-    elif args.gen_xcodeproj:
-        generate_xcodeproj()
-    elif args.test:
-        swift_test()
-    else:
-        parser.print_help()
+    try:
+        if args.gen_spm_module:
+            generate_spm_module()
+        elif args.gen_xcodeproj:
+            generate_xcodeproj()
+        elif args.test:
+            swift_test()
+        else:
+            parser.print_help()
+    except subprocess.CalledProcessError as err:
+        print("Error: command '%s' exited with status %d" %
+              (' '.join(err.cmd), err.returncode), file=sys.stderr)
+        sys.exit(err.returncode)
+    except (IOError, OSError) as err:
+        print(err, file=sys.stderr)
+        sys.exit(1)

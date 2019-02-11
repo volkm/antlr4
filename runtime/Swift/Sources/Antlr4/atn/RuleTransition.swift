@@ -1,29 +1,26 @@
+/// 
 /// Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
 /// Use of this file is governed by the BSD 3-clause license that
 /// can be found in the LICENSE.txt file in the project root.
+/// 
 
 
 
 
 
 public final class RuleTransition: Transition {
+    /// 
     /// Ptr to the rule definition object for this rule ref
-    public final var ruleIndex: Int
+    /// 
+    public let ruleIndex: Int
     // no Rule object at runtime
 
-    public final var precedence: Int
+    public let precedence: Int
 
+    /// 
     /// What node to begin computations following ref to rule
-    public final var followState: ATNState
-
-    /// -  Use
-    /// {@link #RuleTransition(org.antlr.v4.runtime.atn.RuleStartState, int, int, org.antlr.v4.runtime.atn.ATNState)} instead.
-    //@Deprecated
-    public convenience init(_ ruleStart: RuleStartState,
-                            _ ruleIndex: Int,
-                            _ followState: ATNState) {
-        self.init(ruleStart, ruleIndex, 0, followState)
-    }
+    /// 
+    public let followState: ATNState
 
     public init(_ ruleStart: RuleStartState,
                 _ ruleIndex: Int,

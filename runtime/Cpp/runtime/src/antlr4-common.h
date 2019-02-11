@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <atomic>
 #include <codecvt>
 #include <chrono>
 #include <fstream>
@@ -63,6 +64,8 @@
     typedef std::basic_string<__int32> i32string;
 
     typedef i32string UTF32String;
+  #else
+    typedef std::u32string UTF32String;
   #endif
 
   #ifdef ANTLR4CPP_EXPORTS
@@ -75,7 +78,12 @@
     #endif
   #endif
 
-  class ANTLR4CPP_PUBLIC std::exception; // Needed for VS 2015.
+  #if defined(_MSC_VER) && !defined(__clang__)
+    // clang-cl should escape this to prevent [ignored-attributes].
+    namespace std {
+      class ANTLR4CPP_PUBLIC exception; // Prevents warning C4275 from MSVC.
+    } // namespace std
+  #endif
 
 #elif defined(__APPLE__)
   typedef std::u32string UTF32String;

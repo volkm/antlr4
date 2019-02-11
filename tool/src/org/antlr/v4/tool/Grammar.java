@@ -81,6 +81,7 @@ public class Grammar implements AttributeResolver {
 		parserOptions.add("TokenLabelType");
 		parserOptions.add("tokenVocab");
 		parserOptions.add("language");
+		parserOptions.add("accessLevel");
 		parserOptions.add("exportMacro");
 	}
 
@@ -628,6 +629,16 @@ public class Grammar implements AttributeResolver {
 		int i = (I!=null)? I : Token.INVALID_TYPE;
 		//tool.log("grammar", "grammar type "+type+" "+tokenName+"->"+i);
 		return i;
+	}
+
+	public String getTokenName(String literal) {
+		Grammar grammar = this;
+		while (grammar != null) {
+			if (grammar.stringLiteralToTypeMap.containsKey(literal))
+				return grammar.getTokenName(grammar.stringLiteralToTypeMap.get(literal));
+			grammar = grammar.parent;
+		}
+		return null;
 	}
 
 	/** Given a token type, get a meaningful name for it such as the ID
