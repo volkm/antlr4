@@ -236,9 +236,9 @@ public class CommonToken: WritableToken {
         }
         var txt: String
         if let tokenText = getText() {
-            txt = tokenText.replaceAll("\n", replacement: "\\n")
-            txt = txt.replaceAll("\r", replacement: "\\r")
-            txt = txt.replaceAll("\t", replacement: "\\t")
+            txt = tokenText.replacingOccurrences(of: "\n", with: "\\n")
+            txt = txt.replacingOccurrences(of: "\r", with: "\\r")
+            txt = txt.replacingOccurrences(of: "\t", with: "\\t")
         } else {
             txt = "<no text>"
         }
@@ -246,14 +246,7 @@ public class CommonToken: WritableToken {
         if let r = r {
             typeString = r.getVocabulary().getDisplayName(type);
         }
-       return "[@"+getTokenIndex()+","+start+":"+stop+"='"+txt+"',<"+typeString+">"+channelStr+","+line+":"+getCharPositionInLine()+"]"
-//        let desc: StringBuilder = StringBuilder()
-//        desc.append("[@\(getTokenIndex()),")
-//        desc.append("\(start):\(stop)='\(txt)',")
-//        desc.append("<\(typeString)>\(channelStr),")
-//        desc.append("\(line):\(getCharPositionInLine())]")
-//
-//        return desc.toString()
+       return "[@\(getTokenIndex()),\(start):\(stop)='\(txt)',<\(typeString)>\(channelStr),\(line):\(getCharPositionInLine())]"
     }
     public var visited: Bool {
         get {
